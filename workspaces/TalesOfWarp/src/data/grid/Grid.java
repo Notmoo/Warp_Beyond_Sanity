@@ -12,6 +12,8 @@ import java.util.Objects;
 //TODO ajoute un boolean 'isLoaded' pour éviter les problèmes d'accès avant que load(...) soit appelée
 public class Grid {
 
+    private float gridPixelPosX, gridPixelPosY;
+
     private Tile[][] map;
     private Collection<Tuple<Tile, Tuple<Integer, Integer>>> elementsOnTile;
 
@@ -22,11 +24,15 @@ public class Grid {
     private float tileWidth, tileHeight;
     private ICoordHelper coordHelper;
 
-    public Grid(float tileWidth, float tileHeight) {
+    public Grid(float tileWidth, float tileHeight, float gridPixelPosX, float gridPixelPosY) {
         this.tileWidth = tileWidth;
         this.tileHeight = tileHeight;
-        this.coordHelper = CoordinateHelperFactory.makeGridCoordinateHelper();
         this.elementsOnTile = new ArrayList<>();
+
+        this.gridPixelPosX = gridPixelPosX;
+        this.gridPixelPosY = gridPixelPosY;
+        this.coordHelper = CoordinateHelperFactory.makeGridCoordinateHelper();
+        this.coordHelper.setPixelOffset(gridPixelPosX, gridPixelPosY);
     }
 
     public void load(int nbRows, int nbCols, int nbDisplayedRows, int nbDisplayedCols, Integer[][] gridData){
@@ -40,7 +46,7 @@ public class Grid {
 
         for(int i = 0; i< nbCols; i++){
             for(int j = 0; j< nbRows; j++){
-                Integer data = gridData[j][i];
+                Integer data = gridData[i][j];
                 if(data != null)
                     setTile(i, j, TileType.getTypeById(data));
             }
@@ -88,9 +94,11 @@ public class Grid {
 
             //On utilise getPixelPos() sans les coords de la zone à afficher car on l'a déjà prise en compte
             Tuple<Float, Float> pixelPos = coordHelper.getPixelPos(row, col, tileWidth, tileHeight);
-            element.x.setX(pixelPos.x);
-            element.x.setY(pixelPos.y);
-            element.x.draw();
+            if(pixelPos!=null) {
+                element.x.setX(pixelPos.x);
+                element.x.setY(pixelPos.y);
+                element.x.draw();
+            }
         });
     }
 
@@ -127,7 +135,7 @@ public class Grid {
 
     private void setTileInMatrix(Tile[][] matrix, int row, int col, TileType type){
         if(areCoordInGrid(row,col)) {
-            matrix[row][col] = generateTile(row, col, type);
+            matrix[col][row] = generateTile(row, col, type);
         }
     }
 
@@ -161,7 +169,7 @@ public class Grid {
 
     private Tile getTileInMatrix(Tile[][] m, int row, int col){
         if(areCoordInGrid(row,col))
-            return m[row][col];
+            return m[col][row];
         else
             return null;
     }
@@ -182,7 +190,7 @@ public class Grid {
     }
 
     public boolean isTileSelected(int row, int col){
-        return this.elementsOnTile.stream().anyMatch(element->element.y.x == row && element.y.y == col);
+        return this.elementsOnTile.stream().anyMatch(element->element.y.x == col && element.y.y == row);
     }
 
     public boolean isTileSelected(Tuple<Integer, Integer> pos){
