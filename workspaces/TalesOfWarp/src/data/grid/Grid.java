@@ -15,6 +15,9 @@ public class Grid {
     private Tile[][] map;
     private Collection<Tuple<Tile, Tuple<Integer, Integer>>> elementsOnTile;
 
+    private int nbDisplayedRows, nbDisplayedCols;
+    private int firstDiplayedRow, firstDiplayedCol;
+
     private int nbRows, nbCols;
     private float tileWidth, tileHeight;
     private ICoordHelper coordHelper;
@@ -26,10 +29,14 @@ public class Grid {
         this.elementsOnTile = new ArrayList<>();
     }
 
-    public void load(int nbRows, int nbCols, Integer[][] gridData){
+    public void load(int nbRows, int nbCols, int nbDisplayedRows, int nbDisplayedCols, Integer[][] gridData){
         this.map = new Tile[nbRows][nbCols];
         this.nbRows = nbRows;
         this.nbCols = nbCols;
+        this.nbDisplayedRows = nbDisplayedRows;
+        this.nbDisplayedCols = nbDisplayedCols;
+        this.firstDiplayedCol = 0;
+        this.firstDiplayedRow = 0;
 
         for(int i = 0; i< nbCols; i++){
             for(int j = 0; j< nbRows; j++){
@@ -45,8 +52,15 @@ public class Grid {
     }
 
     public void updateAndDraw(){
-        for(int i = 0; i< nbCols; i++){
-            for(int j = 0; j< nbRows; j++){
+        int currentDisplayedRow = 0, currentDisplayedCol = 0;
+
+        int minCol = Math.max(firstDiplayedCol, 0);
+        int minRow = Math.max(firstDiplayedRow, 0);
+        int maxCol = Math.min(firstDiplayedCol+nbDisplayedCols, nbCols);
+        int maxRow = Math.min(firstDiplayedRow+nbDisplayedRows, nbRows);
+
+        for(int i = minCol; i< maxCol; i++){
+            for(int j = minRow; j< maxRow; j++){
                 Tile tile = getTile(j, i);
                 if(tile!=null) {
                     tile.update();
@@ -56,11 +70,33 @@ public class Grid {
                         selectIfNotActivated(j-1, i);
                         selectIfNotActivated(j+1, i);
                     }
+
+                    //On utilise getPixelPos() sans les coords de la zone à afficher car on l'a déjà prise en compte
+                    Tuple<Float, Float> pixelPos = coordHelper.getPixelPos(currentDisplayedRow, currentDisplayedCol, tileWidth, tileHeight);
+                    tile.setX(pixelPos.x);
+                    tile.setY(pixelPos.y);
                     tile.draw();
                 }
+                currentDisplayedRow++;
             }
+            currentDisplayedRow = 0;
+            currentDisplayedCol++;
         }
-        elementsOnTile.forEach(element->element.x.draw());
+        elementsOnTile.stream().filter(element->isInDisplayedArea(element.y.x, element.y.y)).forEach(element->{
+            int row = element.y.x-firstDiplayedRow;
+            int col = element.y.y-firstDiplayedCol;
+
+            //On utilise getPixelPos() sans les coords de la zone à afficher car on l'a déjà prise en compte
+            Tuple<Float, Float> pixelPos = coordHelper.getPixelPos(row, col, tileWidth, tileHeight);
+            element.x.setX(pixelPos.x);
+            element.x.setY(pixelPos.y);
+            element.x.draw();
+        });
+    }
+
+    private boolean isInDisplayedArea(Integer row, Integer col) {
+        return col>=firstDiplayedCol && col<firstDiplayedCol+nbDisplayedCols
+                && row>=firstDiplayedRow && row<firstDiplayedRow+nbDisplayedRows;
     }
 
     private void selectIfNotActivated(int row, int col){
@@ -70,7 +106,10 @@ public class Grid {
          }
     }
 
+    //TODO Limiter les mvt du joueur à la zone affichée?
     public boolean isPlayerMovePossible(Tuple<Integer, Integer> pos){
+        if(!areCoordInGrid(pos.x, pos.y))
+            return false;
         if(isTileActivated(pos))
             return true;
         if(isTileActivated(pos.x-1, pos.y))
@@ -79,9 +118,7 @@ public class Grid {
             return true;
         if(isTileActivated(pos.x, pos.y-1))
             return true;
-        if(isTileActivated(pos.x, pos.y+1))
-            return true;
-        return false;
+        return isTileActivated(pos.x, pos.y + 1);
     }
 
     public void setTile(int row, int col, TileType newType){
@@ -94,10 +131,26 @@ public class Grid {
         }
     }
 
+    public void centerDisplayedAreaOn(int row, int col){
+        /*
+            L'algo suivant permet d'éviter qu'on affiche des cellules en dehors de la grille, en limittant la zone à
+            afficher aux cellules de la grille.
+
+            Concrètement, ça veut dire que si on cherche à centrer l'affichage sur un coin de la carte, le centre sera
+            déplacé de sorte que le dit-coin soit affiché au coin de la zone à afficher
+         */
+        int firstRow = Math.max(Math.min(row-(int)Math.floor(nbDisplayedRows/2),nbRows-nbDisplayedRows), 0);
+        int firstCol = Math.max(Math.min(col-(int)Math.floor(nbDisplayedCols/2),nbCols-nbDisplayedCols), 0);
+
+        this.firstDiplayedRow = firstRow;
+        this.firstDiplayedCol = firstCol;
+    }
+
     private Tile generateTile(int row, int col, TileType type){
         if (type != null) {
             Tuple<Float, Float> pos = getPixelPos(row, col);
-            return new Tile(pos.x, pos.y, tileWidth, tileHeight, type);
+            if(pos!=null)
+                return new Tile(pos.x, pos.y, tileWidth, tileHeight, type);
         }
         return null;
     }
@@ -159,10 +212,10 @@ public class Grid {
     }
 
     public Tuple<Integer, Integer> getGridPos(float x, float y) {
-        return coordHelper.getGridPos(x, y, tileWidth, tileHeight);
+        return coordHelper.getGridPos(x, y, tileWidth, tileHeight, firstDiplayedRow, firstDiplayedCol);
     }
 
     public Tuple<Float, Float> getPixelPos(int row, int column) {
-        return coordHelper.getPixelPos(row, column, tileWidth, tileHeight);
+        return coordHelper.getPixelPos(row, column, tileWidth, tileHeight, firstDiplayedRow, firstDiplayedCol);
     }
 }

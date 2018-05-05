@@ -26,7 +26,7 @@ public class Boot {
         };
 
         Grid grid = new Grid(tileWidth, tileHeight);
-        grid.load(10, 10, mapData);/**/
+        grid.load(10, 10,7,7, mapData);/**/
         grid.setActivateTile(1,1,true);
         grid.setPlayerPos(1, 1);
 

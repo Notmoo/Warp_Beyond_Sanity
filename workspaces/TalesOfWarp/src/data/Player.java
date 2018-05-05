@@ -62,7 +62,9 @@ public class Player {
     public void updateAndDraw(){
         if(moveSuccessful)
             lastPlayerPos = lastPosSelected;
-        if(lastPlayerPos!=null)
+        if(lastPlayerPos!=null){
             grid.setPlayerPos(lastPlayerPos);
+            grid.centerDisplayedAreaOn(lastPlayerPos.x, lastPlayerPos.y);
+        }
     }
 }
