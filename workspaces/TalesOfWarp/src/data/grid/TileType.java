@@ -6,15 +6,15 @@ import java.util.EnumSet;
 public enum TileType {
 
     None("", "", -1)
-    ,TopLeft("grass_tl", "grass_tl_fog", 0)
-    ,Top("grass_t", "grass_t_fog", 1)
-    ,TopRight("grass_tr", "grass_tr_fog", 2)
-    ,Left("grass_l", "grass_l_fog", 3)
-    ,Middle("grass_m", "grass_m_fog", 4)
-    ,Right("grass_r", "grass_r_fog", 5)
-    ,BottomLeft("grass_bl", "grass_bl_fog", 6)
-    ,Bottom("grass_b", "grass_b_fog", 7)
-    ,BottomRight("grass_br", "grass_br_fog", 8)
+    ,TopLeft("grass_tl", "old_scroll", 0)
+    ,Top("grass_t", "old_scroll", 1)
+    ,TopRight("grass_tr", "old_scroll", 2)
+    ,Left("grass_l", "old_scroll", 3)
+    ,Middle("grass_m", "old_scroll", 4)
+    ,Right("grass_r", "old_scroll", 5)
+    ,BottomLeft("grass_bl", "old_scroll", 6)
+    ,Bottom("grass_b", "old_scroll", 7)
+    ,BottomRight("grass_br", "old_scroll", 8)
     ,SelectedTile("selected_tile", "selected_tile", 9)
     ,Player("character", "character", 10);
     ;

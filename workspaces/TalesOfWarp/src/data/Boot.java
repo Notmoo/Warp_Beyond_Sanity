@@ -9,24 +9,20 @@ public class Boot {
     public Boot() {
         initWindow();
 
-        int tileWidth = 64, tileHeight=64;
+        int tileWidth = 128, tileHeight=128;
 
         //Must be a array int[maxR-minR][maxQ-minQ]
         Integer[][] mapData = {
-                {0,1,1,1,1,1,1,1,1,2},
-                {3,4,4,4,4,4,4,4,4,5},
-                {3,4,4,4,4,4,4,4,4,5},
-                {3,4,4,4,4,4,4,4,4,5},
-                {3,4,4,4,4,4,4,4,4,5},
-                {3,4,4,4,4,4,4,4,4,5},
-                {3,4,4,4,4,4,4,4,4,5},
-                {3,4,4,4,4,4,4,4,4,5},
-                {3,4,4,4,4,4,4,4,4,5},
-                {6,7,7,7,7,7,7,7,7,8}
+                {4,4,4,4,4,4},
+                {4,4,4,4,4,4},
+                {4,4,4,4,4,4},
+                {4,4,4,4,4,4},
+                {4,4,4,4,4,4},
+                {4,4,4,4,4,4}
         };
 
-        Grid grid = new Grid(tileWidth, tileHeight, 300, 100);
-        grid.load(10, 10,10,10, mapData);/**/
+        Grid grid = new Grid(tileWidth, tileHeight, 0, 0);
+        grid.load(6, 6, mapData);/**/
         grid.setActivateTile(1,1,true);
         grid.setPlayerPos(1, 1);
 

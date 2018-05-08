@@ -35,6 +35,10 @@ public class Grid {
         this.coordHelper.setPixelOffset(gridPixelPosX, gridPixelPosY);
     }
 
+    public void load(int nbRows, int nbCols, Integer[][] gridData){
+        load(nbRows, nbCols, nbRows, nbCols, gridData);
+    }
+
     public void load(int nbRows, int nbCols, int nbDisplayedRows, int nbDisplayedCols, Integer[][] gridData){
         this.map = new Tile[nbRows][nbCols];
         this.nbRows = nbRows;
