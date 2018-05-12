@@ -14,6 +14,9 @@ public class Grid {
 
     private float gridPixelPosX, gridPixelPosY;
 
+    private Tile gridBorder;
+    private float gridBorderWidth, gridBorderHeight, gridBorderThickness;
+
     private Tile[][] map;
     private Collection<Tuple<Tile, Tuple<Integer, Integer>>> elementsOnTile;
 
@@ -29,10 +32,15 @@ public class Grid {
         this.tileHeight = tileHeight;
         this.elementsOnTile = new ArrayList<>();
 
+        this.gridBorderWidth = 512;
+        this.gridBorderHeight = 512;
+        this.gridBorderThickness = 2;
+        this.gridBorder = new Tile(gridPixelPosX, gridPixelPosY, gridBorderWidth, gridBorderHeight, TileType.GRID_BORDER);
+
         this.gridPixelPosX = gridPixelPosX;
         this.gridPixelPosY = gridPixelPosY;
         this.coordHelper = CoordinateHelperFactory.makeGridCoordinateHelper();
-        this.coordHelper.setPixelOffset(gridPixelPosX, gridPixelPosY);
+        this.coordHelper.setPixelOffset(gridPixelPosX+gridBorderThickness, gridPixelPosY+gridBorderThickness);
     }
 
     public void load(int nbRows, int nbCols, Integer[][] gridData){
@@ -104,6 +112,8 @@ public class Grid {
                 element.x.draw();
             }
         });
+
+        gridBorder.draw();
     }
 
     private boolean isInDisplayedArea(Integer row, Integer col) {
@@ -213,14 +223,6 @@ public class Grid {
 
     public void setActivateTile(Tuple<Integer, Integer> pos, boolean activate) {
         setActivateTile(pos.x, pos.y, activate);
-    }
-
-    public void setPlayerPos(int row, int col){
-        setPlayerPos(new Tuple<>(row, col));
-    }
-
-    public void setPlayerPos(Tuple<Integer, Integer> pos){
-        elementsOnTile.add(new Tuple<>(generateTile(pos.x, pos.y, TileType.Player), pos));
     }
 
     public Tuple<Integer, Integer> getGridPos(float x, float y) {

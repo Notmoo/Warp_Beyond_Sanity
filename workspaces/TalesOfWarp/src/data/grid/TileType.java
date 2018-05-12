@@ -16,7 +16,8 @@ public enum TileType {
     ,Bottom("grass_b", "old_scroll", 7)
     ,BottomRight("grass_br", "old_scroll", 8)
     ,SelectedTile("selected_tile", "selected_tile", 9)
-    ,Player("character", "character", 10);
+    ,Player("character", "character", 10)
+    , GRID_BORDER("grid_border_6x6_64x64", "grid_border_6x6_64x64", 11);
     ;
 
     private final String textureName, foggyTextureName;
