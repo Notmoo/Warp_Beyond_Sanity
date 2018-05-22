@@ -1,21 +1,26 @@
 package data.grid;
 
+import data.IScreen;
 import data.Tuple;
 import helpers.CoordinateHelperFactory;
+import helpers.DrawUtil;
 import helpers.ICoordHelper;
+import org.newdawn.slick.opengl.Texture;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
-//TODO ajoute un boolean 'isLoaded' pour éviter les problèmes d'accès avant que load(...) soit appelée
-public class Grid {
+import static helpers.TexUtil.QuickLoadPngTexture;
 
+//TODO ajoute un boolean 'isLoaded' pour éviter les problèmes d'accès avant que load(...) soit appelée
+public class Grid implements IScreen{
+
+    private boolean isShown;
     private float gridPixelPosX, gridPixelPosY;
 
-    private Tile gridBorder;
-    private float gridBorderWidth, gridBorderHeight, gridBorderThickness;
+    private Texture gridBorderTex;
 
     private Tile[][] map;
     private Collection<Tuple<Tile, Tuple<Integer, Integer>>> elementsOnTile;
@@ -28,19 +33,19 @@ public class Grid {
     private ICoordHelper coordHelper;
 
     public Grid(float tileWidth, float tileHeight, float gridPixelPosX, float gridPixelPosY) {
+        this.isShown = false;
+
         this.tileWidth = tileWidth;
         this.tileHeight = tileHeight;
         this.elementsOnTile = new ArrayList<>();
 
-        this.gridBorderWidth = 512;
-        this.gridBorderHeight = 512;
-        this.gridBorderThickness = 2;
-        this.gridBorder = new Tile(gridPixelPosX, gridPixelPosY, gridBorderWidth, gridBorderHeight, TileType.GRID_BORDER);
+        float gridBorderThickness = 2;
+        this.gridBorderTex = QuickLoadPngTexture("grid_border_6x6_64x64");
 
         this.gridPixelPosX = gridPixelPosX;
         this.gridPixelPosY = gridPixelPosY;
         this.coordHelper = CoordinateHelperFactory.makeGridCoordinateHelper();
-        this.coordHelper.setPixelOffset(gridPixelPosX+gridBorderThickness, gridPixelPosY+gridBorderThickness);
+        this.coordHelper.setPixelOffset(gridPixelPosX+ gridBorderThickness, gridPixelPosY+ gridBorderThickness);
     }
 
     public void load(int nbRows, int nbCols, Integer[][] gridData){
@@ -69,7 +74,25 @@ public class Grid {
         elementsOnTile.clear();
     }
 
+    @Override
+    public boolean isShown() {
+        return isShown;
+    }
+
+    @Override
+    public void show() {
+        this.isShown = true;
+    }
+
+    @Override
+    public void hide() {
+        this.isShown = false;
+    }
+
     public void updateAndDraw(){
+        if(!isShown)
+            return;
+
         int currentDisplayedRow = 0, currentDisplayedCol = 0;
 
         int minCol = Math.max(firstDiplayedCol, 0);
@@ -113,7 +136,7 @@ public class Grid {
             }
         });
 
-        gridBorder.draw();
+        DrawUtil.drawQuadTexUsingTexDimensions(gridBorderTex, gridPixelPosX, gridPixelPosY);
     }
 
     private boolean isInDisplayedArea(Integer row, Integer col) {
@@ -151,21 +174,6 @@ public class Grid {
         if(areCoordInGrid(row,col)) {
             matrix[col][row] = generateTile(row, col, type);
         }
-    }
-
-    public void centerDisplayedAreaOn(int row, int col){
-        /*
-            L'algo suivant permet d'éviter qu'on affiche des cellules en dehors de la grille, en limittant la zone à
-            afficher aux cellules de la grille.
-
-            Concrètement, ça veut dire que si on cherche à centrer l'affichage sur un coin de la carte, le centre sera
-            déplacé de sorte que le dit-coin soit affiché au coin de la zone à afficher
-         */
-        int firstRow = Math.max(Math.min(row-(int)Math.floor(nbDisplayedRows/2),nbRows-nbDisplayedRows), 0);
-        int firstCol = Math.max(Math.min(col-(int)Math.floor(nbDisplayedCols/2),nbCols-nbDisplayedCols), 0);
-
-        this.firstDiplayedRow = firstRow;
-        this.firstDiplayedCol = firstCol;
     }
 
     private Tile generateTile(int row, int col, TileType type){

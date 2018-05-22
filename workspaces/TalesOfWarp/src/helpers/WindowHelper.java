@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class WindowHelper {
 
-    public static final int WIDTH = 1280, HEIGHT = 800;
+    public static final int WIDTH = 1280, HEIGHT = 768;
 
     public static void initWindow(){
         try {
