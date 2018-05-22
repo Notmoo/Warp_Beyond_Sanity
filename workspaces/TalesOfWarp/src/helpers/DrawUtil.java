@@ -7,6 +7,28 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class DrawUtil {
 
+    public static void drawQuadTexUsingTexDimensions(Texture tex, float x, float y){
+        tex.bind();
+        glTranslatef(x, y, 0);
+
+        glBegin(GL_QUADS);
+
+        glTexCoord2f(0, 0);
+        glVertex2f(0, 0);
+
+        glTexCoord2f(tex.getWidth(), 0);
+        glVertex2f(tex.getImageWidth(), 0);
+
+        glTexCoord2f(tex.getWidth(), tex.getHeight());
+        glVertex2f(tex.getImageWidth(),tex.getImageHeight());
+
+        glTexCoord2f(0, tex.getHeight());
+        glVertex2f(0,tex.getImageHeight());
+
+        glEnd();
+        glLoadIdentity();
+    }
+
     public static void drawQuadTex(Texture tex, float x, float y, float width, float height){
         tex.bind();
         glTranslatef(x, y, 0);
@@ -52,7 +74,6 @@ public class DrawUtil {
     }
 
     public static void drawTile(IDrawable drawable){
-        //drawHexTexAsQuadTex(drawable.getTexture(), drawable.getX(), drawable.getY(), drawable.getWidth(), drawable.getHeight(), drawable.getXOffset(), drawable.getYOffset());
         drawQuadTex(drawable.getTexture(), drawable.getX(), drawable.getY(), drawable.getWidth(), drawable.getHeight());
     }
 }
