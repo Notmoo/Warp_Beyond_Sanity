@@ -11,6 +11,7 @@ public class TexUtil {
 
     public static Texture LoadTexture(String path, String fileType){
         Texture tex = null;
+
         InputStream in = ResourceLoader.getResourceAsStream(path);
 
         try {

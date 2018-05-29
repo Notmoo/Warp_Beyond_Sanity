@@ -24,7 +24,7 @@ public class Player {
             @Override
             public void update() {
                 previousValue = value;
-                value = Mouse.isButtonDown(0); //Clic gauche
+                value = Mouse.isButtonDown(0); //0 = clic gauche
                 if(isActivated())
                     tryActivateTile();
             }
@@ -40,8 +40,13 @@ public class Player {
         float x = Mouse.getX(), y = HEIGHT - Mouse.getY();
         Tuple<Integer, Integer> pos = grid.getGridPos(x, y);
         boolean isMovePossible = grid.isPlayerMovePossible(pos);
-        if(isMovePossible)
-            grid.setActivateTile(pos, true);/**/
+        //TODO Retirer la possiblité de retirer des contenus en cliquant : les contenus des Tile doivent être activés lors du clic pour découvrir, et être retirés si victoire de l'event (Et certains types ne peuvent pas être retirés, comme la ville)
+        if(grid.isTileActivated(pos)){
+            grid.removeTileContent(pos);
+        }else if(isMovePossible){
+            grid.setActivateTile(pos, true);
+        }
+
     }
 
     public void readInput(){

@@ -48,11 +48,11 @@ public class Grid implements IScreen{
         this.coordHelper.setPixelOffset(gridPixelPosX+ gridBorderThickness, gridPixelPosY+ gridBorderThickness);
     }
 
-    public void load(int nbRows, int nbCols, Integer[][] gridData){
+    public void load(int nbRows, int nbCols, Integer[][][] gridData){
         load(nbRows, nbCols, nbRows, nbCols, gridData);
     }
 
-    public void load(int nbRows, int nbCols, int nbDisplayedRows, int nbDisplayedCols, Integer[][] gridData){
+    public void load(int nbRows, int nbCols, int nbDisplayedRows, int nbDisplayedCols, Integer[][][] gridData){
         this.map = new Tile[nbRows][nbCols];
         this.nbRows = nbRows;
         this.nbCols = nbCols;
@@ -63,9 +63,10 @@ public class Grid implements IScreen{
 
         for(int i = 0; i< nbCols; i++){
             for(int j = 0; j< nbRows; j++){
-                Integer data = gridData[i][j];
-                if(data != null)
-                    setTile(i, j, TileType.getTypeById(data));
+                Integer cellType = gridData[i][j][0];
+                Integer cellContent = gridData[i][j][1];
+                if(cellType != null && cellContent != null)
+                    setTile(i, j, TileType.getTypeById(cellType), TileContent.getContentById(cellContent));
             }
         }
     }
@@ -147,7 +148,7 @@ public class Grid implements IScreen{
     private void selectIfNotActivated(int row, int col){
          Tile tile = getTile(row, col);//Renvoie null si les coords sont en dehors de la map, ou si la case vaut null de base
          if(tile != null && !tile.isActivated){
-             elementsOnTile.add(new Tuple<>(generateTile(row, col, TileType.SelectedTile), new Tuple<>(row, col)));
+             elementsOnTile.add(new Tuple<>(generateTile(row, col, TileType.SelectedTile, TileContent.NONE), new Tuple<>(row, col)));
          }
     }
 
@@ -166,21 +167,21 @@ public class Grid implements IScreen{
         return isTileActivated(pos.x, pos.y + 1);
     }
 
-    public void setTile(int row, int col, TileType newType){
-        setTileInMatrix(map, row, col, newType);
+    public void setTile(int row, int col, TileType newType, TileContent content){
+        setTileInMatrix(map, row, col, newType, content);
     }
 
-    private void setTileInMatrix(Tile[][] matrix, int row, int col, TileType type){
+    private void setTileInMatrix(Tile[][] matrix, int row, int col, TileType type, TileContent content){
         if(areCoordInGrid(row,col)) {
-            matrix[col][row] = generateTile(row, col, type);
+            matrix[col][row] = generateTile(row, col, type, content);
         }
     }
 
-    private Tile generateTile(int row, int col, TileType type){
+    private Tile generateTile(int row, int col, TileType type, TileContent content){
         if (type != null) {
             Tuple<Float, Float> pos = getPixelPos(row, col);
             if(pos!=null)
-                return new Tile(pos.x, pos.y, tileWidth, tileHeight, type);
+                return new Tile(pos.x, pos.y, tileWidth, tileHeight, type, content);
         }
         return null;
     }
@@ -223,6 +224,14 @@ public class Grid implements IScreen{
         return row>=0 && col>=0 && row<nbRows && col<nbCols;
     }
 
+    public TileContent getTileContent(int row, int col){
+        return Objects.requireNonNull(getTileInMatrix(map, row, col)).getContent();
+    }
+
+    public TileContent getTileContent(Tuple<Integer, Integer> pos){
+        return getTileContent(pos.x, pos.y);
+    }
+
     public void setActivateTile(int row, int col, boolean activate) {
         Tile tile = getTile(row, col);
         if(tile!=null)
@@ -231,6 +240,16 @@ public class Grid implements IScreen{
 
     public void setActivateTile(Tuple<Integer, Integer> pos, boolean activate) {
         setActivateTile(pos.x, pos.y, activate);
+    }
+
+    public void removeTileContent(int row, int col){
+        Tile tile = getTile(row, col);
+        if(tile!=null)
+            tile.setContent(TileContent.NONE);
+    }
+
+    public void removeTileContent(Tuple<Integer, Integer> pos){
+        removeTileContent(pos.x, pos.y);
     }
 
     public Tuple<Integer, Integer> getGridPos(float x, float y) {

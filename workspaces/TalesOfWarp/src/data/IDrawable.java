@@ -7,7 +7,7 @@ public interface IDrawable {
     float getHeight();
     float getX();
     float getY();
-    Texture getTexture();
+    Texture[] getTextures();
     void update();
     void draw();
 }

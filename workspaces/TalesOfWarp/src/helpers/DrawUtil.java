@@ -73,7 +73,10 @@ public class DrawUtil {
         glLoadIdentity();
     }
 
-    public static void drawTile(IDrawable drawable){
-        drawQuadTex(drawable.getTexture(), drawable.getX(), drawable.getY(), drawable.getWidth(), drawable.getHeight());
+    public static void drawDrawable(IDrawable drawable){
+        for(Texture tex : drawable.getTextures()){
+            if(tex!=null)
+                drawQuadTex(tex, drawable.getX(), drawable.getY(), drawable.getWidth(), drawable.getHeight());
+        }
     }
 }

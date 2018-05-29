@@ -3,17 +3,18 @@ package data.grid;
 import data.IDrawable;
 import org.newdawn.slick.opengl.Texture;
 
-import static helpers.DrawUtil.drawTile;
+import static helpers.DrawUtil.drawDrawable;
 import static helpers.TexUtil.*;
 
 public class Tile implements IDrawable{
 
     protected float x, y, width, height;
     protected boolean isActivated;
-    protected Texture normalTexture, foggyTexture;
+    protected Texture normalTexture, foggyTexture, contentTexture;
     protected TileType type;
+    protected TileContent content;
 
-    public Tile(float x, float y, float width, float height, TileType type) {
+    public Tile(float x, float y, float width, float height, TileType type, TileContent content) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -21,7 +22,13 @@ public class Tile implements IDrawable{
         this.normalTexture = QuickLoadPngTexture(type.getTextureName());
         this.foggyTexture = QuickLoadPngTexture(type.getFoggyTextureName());
         this.type = type;
+        this.content = content;
         this.isActivated = false;
+        reloadContentTexture();
+    }
+
+    private void reloadContentTexture(){
+        this.contentTexture = content==TileContent.NONE ? null : QuickLoadPngTexture(content.getTextureName());
     }
 
     public float getX() {
@@ -56,11 +63,12 @@ public class Tile implements IDrawable{
         this.height = height;
     }
 
-    public Texture getTexture() {
-        if(isActivated)
-            return normalTexture;
-        else
-            return foggyTexture;
+    public Texture[] getTextures() {
+        if(isActivated){
+            return new Texture[]{normalTexture, contentTexture};
+        }else{
+            return new Texture[]{foggyTexture};
+        }
     }
 
     public void setTexture(Texture texture) {
@@ -84,7 +92,7 @@ public class Tile implements IDrawable{
     }
 
     public void draw(){
-        drawTile(this);
+        drawDrawable(this);
     }
 
     public void setActivated(boolean activated) {
@@ -93,5 +101,16 @@ public class Tile implements IDrawable{
 
     public boolean isActivated() {
         return isActivated;
+    }
+
+    public TileContent getContent() {
+        return content;
+    }
+
+    public void setContent(TileContent content) {
+        if(content!=this.content){
+            this.content = content;
+            reloadContentTexture();
+        }
     }
 }
